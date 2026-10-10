@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/* ---------- 显式限定 Tailwind 的扫描范围 ----------
+   Tailwind 4 默认从 CSS 文件所在目录向上找到项目根，然后扫描「根下全部文件」。
+   本项目根下有 docs/（大量 Markdown）与 .agent-teams/（团队信箱 *.jsonl），
+   这些协作文件里出现的类名字符串会被当成候选类，生成根本没人用的野生规则。
+   实测：产物 CSS 里曾出现 .p-[12.34px] / .p-[13.37px] / .p-[66.44px] /
+   .p-[77.55px] / .p-[99.11px] 五条，而 src/ 中完全不存在这些值——
+   它们来自 04-review.md（把 CSS 片段当例子写进了文档）与团队收件箱。
+
+   危害不是体积（几 KB），而是让「产物变化 ⇒ 源码变化」这条诊断链断掉：
+   改文档也能改变生产构建，排查构建差异时会被误导。
+
+   用 @source not 把这两处排除。注意用的是 not 而不是把 @source 指向 src/：
+   后者会让 index.html 等根级 HTML 里的类名漏扫（那些也是真实样式来源）。
+   ---------- */
+@source not "../docs";
+@source not "../.agent-teams";
+
 /* 深色模式改为 class 驱动（Tailwind 默认跟随系统），这样才能手动切换 */
 @custom-variant dark (&:where(.dark, .dark *));
 

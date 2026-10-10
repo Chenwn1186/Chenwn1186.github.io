@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { Tool } from '../tools';
+import type { ToolManifest } from '@platform/contract/tool';
 
 /** #RRGGBB → rgba()，用于生成主题色的浅色底 */
 function hexA(hex: string, a: number) {
@@ -12,7 +12,7 @@ function hexA(hex: string, a: number) {
 const FALLBACK = '#2F5FD0';
 
 /** 工具卡片。已上线的渲染成 <a>，未上线的渲染成不可点的灰色卡 */
-export function ToolCard({ tool }: { tool: Tool }) {
+export function ToolCard({ tool }: { tool: ToolManifest & { iconUrl?: string | null } }) {
   const tint = tool.tint ?? FALLBACK;
   const style = {
     '--tint': tint,
@@ -41,7 +41,7 @@ export function ToolCard({ tool }: { tool: Tool }) {
           strokeLinejoin="round"
           className="size-5.5"
         >
-          {tool.icon}
+          <img src={`/tools/${tool.id}/icon.svg`} alt="" width="22" height="22" />
         </svg>
       </span>
 
@@ -86,7 +86,7 @@ export function ToolCard({ tool }: { tool: Tool }) {
 
   return (
     <a
-      href={tool.url}
+      href={tool.route?.kind === 'external' ? tool.route.href : `${tool.id}/`}
       className={`${base} cursor-pointer hover:-translate-y-0.75 hover:border-line2 hover:shadow-card-hi`}
       style={style}
     >

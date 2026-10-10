@@ -1,0 +1,94 @@
+# CI 质量门禁 —— PR 与 push 都跑，E2E 作为真正的合并门禁
+#
+# 与 deploy.yml 的分工：本文件只做「质量验证」，不做部署。
+# 顺序硬约束：data 必须在最前 —— public/data/lenses.json 与 src/data/lenses-inline.ts
+# 是构建期生成物（被 .gitignore 排除），干净 clone 下不存在；typecheck 依赖
+# lenses-inline.ts、E2E 依赖 lenses.json，漏跑 data 会以 MODULE_NOT_FOUND 崩溃
+# （而非断言语义失败）。e2e/prereq.cjs 提供第二道防线（缺失/空数组都给出明确指引）。
+#
+# ⚠️ playwright 的两条安装路径（评审认定的"实施者最易踩坑点"，务必区分）：
+#   - 本机（有 ms-playwright/chromium-1223 缓存）：
+#       npm i -D playwright --ignore-scripts   ← 跳过浏览器下载，复用已有二进制
+#       绝对不要跑 `npx playwright install chromium`——会新增 build 号更高的浏览器，
+#       改变 e2e/harness.cjs findChrome() 的 `.sort().reverse()` 选取结果，
+#       出现「装完行为反而变了」。
+#   - CI（本文件，runner 无任何浏览器缓存）：必须显式安装：
+#       npx playwright install --with-deps chromium
+#
+# node-version 固定为 24：本仓 TS 是 7.x（Go 原生 tsc），后续迁移会引入
+# 构建期 Node 直读 .ts（类型剥离）；剥离在 Node 22.6+ 才默认开启，22.0–22.5
+# 需要 --experimental-strip-types。pin 24 避免落进那个窗口。
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# 同一分支的新推送取消还在排队的旧任务，省额度
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24 # 见文件头说明：类型剥离 22.6+ 才默认开启
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      # ===== 闸 1：数据流水线（必须最先，理由见文件头） =====
+      - name: 数据流水线
+        run: npm run data
+
+      # ===== 闸 2：类型检查 =====
+      - name: 类型检查
+        run: npm run typecheck
+
+      # ===== 闸 3：lint（含行数护栏 1200=error）=====
+      - name: Lint（硬上限 1200 行 = error + 三条依赖铁律）
+        run: npm run lint
+
+      - name: 行数警戒线（800 行 = warning，不阻塞，仅提示）
+        run: npm run lint:guard
+
+      # ===== 闸 4：构建 =====
+      - name: 构建
+        run: npx vite build
+
+      # ===== 闸 5：E2E（真正的合并门禁）=====
+      # CI runner 没有本机的 chromium-1223，必须显式安装（与本机 --ignore-scripts 路径相反）
+      - name: 安装 chromium（仅 CI 需要这一步）
+        run: npx playwright install --with-deps chromium
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: 启动预览服务
+        run: npx vite preview --port 4173 --host 127.0.0.1 &
+
+      # 零依赖等待（不用 npx wait-on：未声明依赖 + 联网即时下载，破坏可复现性）
+      # --host 127.0.0.1：ubuntu 的 preview 默认监听与本机（IPv6 ::1）不同，显式指定最稳
+      - name: 等待预览服务就绪
+        run: node scripts/wait-port.mjs http://127.0.0.1:4173 60000
+
+      - name: E2E 验收（49 断言）
+        run: npm run e2e http://127.0.0.1:4173
+
+      # 失败时上传截图，便于定位是哪条断言挂了
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-failure-shots
+          path: _shots/
+          retention-days: 7

@@ -14,6 +14,13 @@ const {
   BASE, SHOT_DIR, launch, createReporter, canvasReport,
   prepareRow, rowRect, hitTest, ensureShotDir,
 } = require('./harness.cjs');
+const { assertDataReady } = require('./prereq.cjs');
+
+// 前置：public/data/lenses.json 与 src/data/lenses-inline.ts 是构建期生成物
+// （scripts/prepare-data.mjs 产出，被 .gitignore 排除），干净 clone 下不存在。
+// 这里把它转成明确指引，而不是让「读数据」一步抛 MODULE_NOT_FOUND——
+// 那种崩溃的退出码看起来像脚本自身出错，会误导排查方向。
+const { lensCount: TOTAL } = assertDataReady();
 
 (async () => {
   const r = createReporter();

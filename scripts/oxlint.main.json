@@ -1,0 +1,78 @@
+// oxlint 配置 —— 硬上限 1200 行 = error（触发即构建失败）+ 三条依赖铁律。
+// 警戒线 800 行 = warning 在 scripts/oxlint.guard.json（单独跑，不阻塞）。
+//
+// 选型理由（为什么是 oxlint 而不是 eslint/typescript-eslint）：
+// 1. 本仓 TS 是 ^7.0.2（Go 原生 tsc，`typescript` 包 semver 为 7.x），
+//    typescript-eslint 的 peer 范围是 `typescript >=4.8.4 <6.1.0` —— **硬冲突**，
+//    npm install 直接 ERESOLVE（实测），--force 会得到未测试的组合。
+// 2. 所需规则 max-lines / no-restricted-imports 两条都支持（实测 --rules 均命中），
+//    无需 TS 类型感知 lint，不受 TS 7 影响。
+// 3. 速度与零配置兼容性好；迁移到 platform/tools 目录后同一份配置直接生效。
+//
+// 三条依赖铁律（t15 落地；负向验证证据见 docs/architecture/05 §9 实施记录）：
+//   ① platform/** 不得 import tools/** —— 平台不知道任何具体工具
+//   ② tools/a/** 不得 import tools/b/** —— 工具间零耦合，删除任一工具都安全
+//   ③ portal/** 不得 import tools/<id>/ 内部代码 —— 外壳只经注册表消费工具
+{
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
+  "rules": {
+    // ---------- 行数护栏（用户拍板，勿改数值） ----------
+    "max-lines": [
+      "error",
+      { "max": 1200, "skipBlankLines": false, "skipComments": false }
+    ]
+  },
+  "overrides": [
+    {
+      // ---------- 铁律 ①：平台层禁 import 工具层 ----------
+      "files": ["platform/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/tools/**"],
+                "message": "依赖铁律①：platform/** 不得 import tools/** —— 平台层不知道任何具体工具，依赖方向必须是 tools → platform。"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // ---------- 铁律 ②：工具间零横向依赖（含禁止平台以外的横向引用） ----------
+      "files": ["tools/*/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/tools/*/**", "!**/tools/lens/**"],
+                "message": "依赖铁律②：工具之间必须零依赖（tools/a 不得 import tools/b）——否则无法单独删除任一工具。共享逻辑应下沉到 platform/。"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // ---------- 铁律 ③：门户只读注册表，不 import 工具内部代码 ----------
+      "files": ["src/portal/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/tools/**"],
+                "message": "依赖铁律③：portal/** 不得 import tools/<id>/ 内部代码 —— 门户只经 virtual:toolbox/registry 消费工具，否则外壳与实现耦合，做不到「新增工具不改门户」。"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

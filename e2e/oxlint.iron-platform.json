@@ -1,0 +1,19 @@
+// 铁律①：platform/** 不得 import tools/**（平台不知道任何具体工具）。
+// 由 CI/`npm run lint` 以 `oxlint platform --config scripts/oxlint.iron-platform.json` 单独执行。
+// （oxlint 1.87 的 overrides 块实测不生效——规则被静默忽略，故用分层配置+指定目录跑。）
+{
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["**/tools/**"],
+            "message": "依赖铁律①：platform/** 不得 import tools/** —— 平台层不知道任何具体工具，依赖方向必须是 tools → platform。"
+          }
+        ]
+      }
+    ]
+  }
+}

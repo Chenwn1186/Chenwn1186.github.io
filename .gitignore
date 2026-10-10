@@ -34,3 +34,6 @@ _shots/
 # 日志
 npm-debug.log*
 yarn-error.log*
+
+# AgentTeams 团队内部状态（会话/信箱），不属于仓库
+.agent-teams/

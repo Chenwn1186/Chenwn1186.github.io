@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { toolboxRegistryPlugin, urlLayoutPlugin } from './platform/registry/plugin';
 
 const root = dirname(fileURLToPath(import.meta.url));
 
@@ -12,18 +13,13 @@ const root = dirname(fileURLToPath(import.meta.url));
  *   vite build                    → 多文件构建，产物 dist/，用于部署（按需加载、可缓存）
  *   vite build --mode singlefile  → 单文件构建，产物 dist-single/，JS/CSS/数据全内联进 HTML，
  *                                   适合离线双击打开或单文件分享
+ *
+ * 构建入口（input）不再手写：由 platform/registry/plugin.ts 从 tools/<id>/tool.config.ts
+ * 派生（单一事实来源）。单文件与多文件模式统一派生——迁移前的 P2 缺陷
+ * （单文件只构建 lens，新增工具静默丢失）由此根除。
  */
 export default defineConfig(({ mode }) => {
   const single = mode === 'singlefile';
-
-  // 显式标注为 Record<string,string>：否则三元表达式产生的联合类型
-  // 会被推断成 { main?: undefined }，与 Rolldown 的 InputOption 不兼容
-  const input: Record<string, string> = single
-    ? { lens: resolve(root, 'lens/index.html') }
-    : {
-        main: resolve(root, 'index.html'),
-        lens: resolve(root, 'lens/index.html'),
-      };
 
   // 部署在用户站根路径 https://chenwn1186.github.io/
   // 若日后改成「项目站」（https://用户名.github.io/仓库名/），
@@ -40,13 +36,22 @@ export default defineConfig(({ mode }) => {
     },
 
     plugins: [
+      toolboxRegistryPlugin(),
+      // 把 dist[-single]/tools/<id>/ 重排为 dist[-single]/<id>/（URL 契约 /<id>/）。
+      // 两种模式都需要：单文件也是每工具一个 HTML（只是资源内联）。
+      urlLayoutPlugin(resolve(root, single ? 'dist-single' : 'dist')),
       react(),
       tailwindcss(),
       ...(single ? [viteSingleFile({ removeViteModuleLoader: true })] : []),
     ],
 
     resolve: {
-      alias: { '@': resolve(root, 'src') },
+      alias: {
+        '@': resolve(root, 'src'),
+        // 平台层别名：工具与门户引用 platform/ 的统一入口。
+        // 依赖铁律（oxlint 强制）：platform/** 不得 import tools/**。
+        '@platform': resolve(root, 'platform'),
+      },
     },
 
     build: {
@@ -56,7 +61,7 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1500,
       // 单文件模式下 vite-plugin-singlefile 会关闭 code splitting，
       // 动态 import 自动内联，无需再配 inlineDynamicImports（配了反而会有警告）
-      rollupOptions: { input },
+      // input 由 toolbox-registry 插件派生（见上），此处不再手写
     },
   };
 });

@@ -1,0 +1,29 @@
+// 铁律③：portal/** 不得 import tools/<id>/ 内部代码（外壳只经注册表消费工具）。
+// 由 `oxlint src/portal --config scripts/oxlint.iron-portal.json` 单独执行。
+// 注意：'virtual:toolbox/registry' 是**平台契约入口**，合法；禁止的是
+// 直接 import 具体工具目录（如 '../../tools/lens/App'）或未来出现的
+// 'virtual:toolbox/<id>/*' 深层模块。
+//
+// ⚠️ 版本依赖：group 里的 `virtual:toolbox/!(registry)` 与 `virtual:toolbox/!(registry)/**`
+// 用了 extglob（!() 排除模式）。oxlint 对 eslint 风格 glob 的支持随版本演进——
+// 本配置在 oxlint 1.87.0 验证可用；升级 oxlint 后必须复验：
+//   1) 正向：portal 合法 import 'virtual:toolbox/registry' 仍为 0 error；
+//   2) 负向：portal import 'virtual:toolbox/other'（或任何 tools 路径）仍报铁律③。
+// 若新版本不支持 extglob，退化方案是把 registry 白名单改为精确 paths（枚举合法值），
+// 或改用两条正则 pattern 的 negate 形式。
+{
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["**/tools/**", "virtual:toolbox/!(registry)", "virtual:toolbox/!(registry)/**"],
+            "message": "依赖铁律③：portal/** 不得 import tools/<id>/ 内部代码 —— 门户只经 virtual:toolbox/registry（platform/registry 派生）消费工具，否则外壳与实现耦合，做不到「新增工具不改门户」。"
+          }
+        ]
+      }
+    ]
+  }
+}

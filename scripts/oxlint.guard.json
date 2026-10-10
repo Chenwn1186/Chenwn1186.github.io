@@ -1,0 +1,18 @@
+// 警戒线配置：800 行 = warning（不阻塞）。
+// 与 .oxlintrc.json（硬上限 1200 = error）分开跑，一条命令串两个级别。
+// 设计说明见 .oxlintrc.json 头注释。
+{
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
+  "rules": {
+    "max-lines": [
+      "warn",
+      { "max": 800, "skipBlankLines": false, "skipComments": false }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.ts", "src/**/*.tsx"],
+      "rules": {}
+    }
+  ]
+}

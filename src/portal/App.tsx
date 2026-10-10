@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { SITE, TOOLS } from './tools';
+import { SITE } from './tools';
+import { TOOLS } from 'virtual:toolbox/registry';
 import { SoonCard, ToolCard } from './components/ToolCard';
-import { ThemeToggle } from '../shared/components/ThemeToggle';
-import { useTheme } from '../shared/useTheme';
+import { ThemeToggle } from '@platform/ui/ThemeToggle';
+import { useTheme } from '@platform/theme/useTheme';
 
 export function PortalApp() {
   const { theme, toggle } = useTheme();
@@ -12,7 +13,7 @@ export function PortalApp() {
   /** 所有标签（用于筛选条） */
   const allTags = useMemo(() => {
     const s = new Set<string>();
-    TOOLS.forEach((t) => t.tags.forEach((x) => s.add(x)));
+    TOOLS.forEach((t) => t.tags.forEach((x: string) => s.add(x)));
     return [...s];
   }, []);
 

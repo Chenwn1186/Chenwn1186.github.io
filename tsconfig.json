@@ -20,7 +20,11 @@
     "noUncheckedSideEffectImports": true,
 
     "types": ["vite/client"],
-    "paths": { "@/*": ["./src/*"] }
+    "paths": {
+      "@/*": ["./src/*"],
+      "@platform/*": ["./platform/*"],
+      "virtual:toolbox/registry": ["./platform/registry/virtual.d.ts"]
+    }
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "platform", "tools", "vite.config.ts"]
 }

@@ -5,8 +5,9 @@
 #
 # 注意 base 路径：
 #   用户站（仓库名叫 <用户名>.github.io）→ 站点在域名根，base = "/"
-#   项目站（仓库名任意）              → 站点在 /<仓库名>/，base = "/<仓库名>/"
-# 下面的 VITE_BASE 会自动判断，两种仓库结构都不用手改代码。
+#   项目站（仓库名任意）                → 站点在 /<仓库名>/，base = "/<仓库名>/"
+# 下面的「计算 base 路径」步骤会自动判断（并统一转小写，因为 Pages 域名不分大小写），
+# 所以两种仓库结构都不用手改代码。
 
 name: Deploy to GitHub Pages
 
@@ -39,9 +40,23 @@ jobs:
       - name: 安装依赖
         run: npm ci
 
+      # base 路径：用户站是 "/"，项目站是 "/<仓库名>/"。
+      # 用 shell 判断而不是 GitHub 表达式，因为表达式没有转小写的函数，
+      # 而仓库名大小写与 Pages 域名大小写不一定一致（Pages 域名一律小写）。
+      - name: 计算 base 路径
+        id: base
+        run: |
+          repo_lc=$(echo "${{ github.event.repository.name }}" | tr 'A-Z' 'a-z')
+          owner_lc=$(echo "${{ github.repository_owner }}" | tr 'A-Z' 'a-z')
+          if [ "$repo_lc" = "${owner_lc}.github.io" ]; then
+            echo "value=/" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=/${repo_lc}/" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 构建（含数据清洗）
         env:
-          VITE_BASE: ${{ github.event.repository.name == format('{0}.github.io', github.repository_owner) && '/' || format('/{0}/', github.event.repository.name) }}
+          VITE_BASE: ${{ steps.base.outputs.value }}
         run: npm run build
 
       - uses: actions/configure-pages@v5

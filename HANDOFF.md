@@ -648,7 +648,7 @@ NODE_PATH=/path/to/node_modules npm run e2e
 | 本地路径 | `D:\docs\01-my-website` |
 | 目标远程 | `git@github.com:Chenwn1186/Chenwn1186.github.io.git` |
 | 当前分支 | `main` |
-| 现有提交 | `fe34da3` 初始化 → `2eafae3` CI base 路径改用 shell 判断 → `（本次）e2e + 交接文档` |
+| 现有提交 | `fe34da3` 初始化 → `2eafae3` CI base 路径改用 shell 判断 → `9a268a2` e2e 套件 + 交接文档 |
 | 站点地址 | https://chenwn1186.github.io/ |
 | 镜头工具 | https://chenwn1186.github.io/lens/ |
 | 仓库归属 | GitHub `Chenwn1186` |

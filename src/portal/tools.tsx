@@ -9,7 +9,7 @@
  * 数字应由工具在页面上动态渲染（HeaderSection 已有），卡片只放不随时间变化的描述。
  */
 export const SITE = {
-  owner: '陈伟宁',
+  owner: 'Chenwn1186',
   repoName: 'Chenwn1186.github.io',
   repoGh: 'https://github.com/Chenwn1186',
   home: 'https://chenwn1186.github.io',

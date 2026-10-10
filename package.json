@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "伟宁的工具箱 —— 自研工具集合门户，含全球镜头评测数据库",
+  "description": "我的工具箱 —— 自研工具集合门户，含全球镜头评测数据库",
   "scripts": {
     "dev": "npm run data && vite",
     "data": "node scripts/prepare-data.mjs",

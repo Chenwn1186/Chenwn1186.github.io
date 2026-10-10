@@ -37,7 +37,7 @@ export function PortalApp() {
         <div className="flex items-start justify-between gap-5">
           <div>
             <h1 className="mb-2 text-[29px] leading-tight font-bold tracking-[-0.5px] max-sm:text-[23px]">
-              伟宁的工具箱
+              我的工具箱
             </h1>
             <p className="m-0 max-w-[46ch] text-[15px] text-tx2">
               把日常用到的自研工具收在一处。全部是纯前端单文件，零依赖、即开即用。

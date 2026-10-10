@@ -10,7 +10,8 @@
     "build": "npm run data && tsc --noEmit && vite build",
     "build:only": "vite build",
     "build:single": "npm run data && tsc --noEmit && vite build --mode singlefile",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "e2e": "node e2e/verify.cjs"
   },
   "dependencies": {
     "chart.js": "^4.5.1",

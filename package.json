@@ -1,0 +1,31 @@
+{
+  "name": "chenwn-toolbox",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "伟宁的工具箱 —— 自研工具集合门户，含全球镜头评测数据库",
+  "scripts": {
+    "dev": "npm run data && vite",
+    "data": "node scripts/prepare-data.mjs",
+    "build": "npm run data && tsc --noEmit && vite build",
+    "build:only": "vite build",
+    "build:single": "npm run data && tsc --noEmit && vite build --mode singlefile",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

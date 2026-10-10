@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/* 深色模式改为 class 驱动（Tailwind 默认跟随系统），这样才能手动切换 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- 语义色板 ----------
+   浅色 / 深色两套值挂在 CSS 变量上，组件里一律用变量，
+   切换主题时只改 <html> 的 class，颜色整体自动跟随。 */
+:root {
+  --bg: #FBFBF9;
+  --card: #FFFFFF;
+  --line: #E7E5DF;
+  --line2: #F0EEE9;
+  --tx: #1E1D1B;
+  --tx2: #5B5953;
+  --tx3: #93908A;
+  --acc: #2F5FD0;
+  --acc-soft: #EDF2FE;
+  --shadow: 0 1px 2px rgba(24, 22, 18, .04), 0 6px 20px -8px rgba(24, 22, 18, .10);
+  --shadow-hi: 0 2px 6px rgba(24, 22, 18, .06), 0 18px 40px -14px rgba(24, 22, 18, .20);
+
+  /* 评分三档（高 / 中 / 低）——表格里的分数胶囊用 */
+  --hi: #3B6D11;
+  --hi-bg: #EAF3DE;
+  --mid: #8A6A0F;
+  --mid-bg: #FAEEDA;
+  --lo: #A32D2D;
+  --lo-bg: #FCEBEB;
+}
+.dark {
+  --bg: #131318;
+  --card: #1C1C23;
+  --line: #2A2A33;
+  --line2: #232329;
+  --tx: #EDEDF1;
+  --tx2: #A7A7B2;
+  --tx3: #6F6F7B;
+  --acc: #7B9CFF;
+  --acc-soft: #1E2536;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .30), 0 6px 20px -8px rgba(0, 0, 0, .50);
+  --shadow-hi: 0 2px 6px rgba(0, 0, 0, .40), 0 18px 40px -14px rgba(0, 0, 0, .70);
+
+  --hi: #9BD15C;
+  --hi-bg: #1D2A13;
+  --mid: #E2B455;
+  --mid-bg: #2C2513;
+  --lo: #F0837F;
+  --lo-bg: #331A1A;
+}
+
+/* 把变量接进 Tailwind 的主题，于是 bg-card / text-tx2 / border-line 这类类名可直接用。
+   inline 让工具类引用变量本身而不是拷贝值，所以主题切换时无需重新生成样式。 */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-line2: var(--line2);
+  --color-tx: var(--tx);
+  --color-tx2: var(--tx2);
+  --color-tx3: var(--tx3);
+  --color-acc: var(--acc);
+  --color-acc-soft: var(--acc-soft);
+  --color-hi: var(--hi);
+  --color-hi-bg: var(--hi-bg);
+  --color-mid: var(--mid);
+  --color-mid-bg: var(--mid-bg);
+  --color-lo: var(--lo);
+  --color-lo-bg: var(--lo-bg);
+
+  --shadow-card: var(--shadow);
+  --shadow-card-hi: var(--shadow-hi);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--tx);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color .28s ease, color .28s ease;
+  }
+  ::selection {
+    background: var(--acc-soft);
+  }
+  /* 细一点的滚动条，跟主题走 */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 5px;
+    border: 2px solid var(--bg);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--tx3); }
+}
+
+/* 长表格横向滚动时隐藏滚动条（内容仍可滚） */
+.no-bar::-webkit-scrollbar { height: 0; }
+.no-bar { scrollbar-width: none; }

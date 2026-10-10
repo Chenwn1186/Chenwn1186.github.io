@@ -1,0 +1,15 @@
+# 统一用 LF 入库，避免 Windows 上提交出 CRLF 导致
+# Actions 里的 .yml / .sh 出现换行符问题
+* text=auto eol=lf
+
+# 二进制文件不参与换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# lock 文件不要 diff（体积大且噪音多）
+package-lock.json -diff linguist-generated

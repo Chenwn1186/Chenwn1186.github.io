@@ -1,0 +1,33 @@
+# 依赖
+node_modules/
+.pnpm-store/
+
+# 构建产物
+dist/
+dist-single/
+
+# 缓存
+.vite/
+*.tsbuildinfo
+
+# 编辑器
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 本地存档（静态版回退参考，不入库）
+_archive/
+_tmp/
+
+# 由 scripts/prepare-data.mjs 从 scripts/lenses-source.json 生成，构建时自动产出
+public/data/lenses.json
+src/data/lenses-inline.ts
+
+# 日志
+npm-debug.log*
+yarn-error.log*

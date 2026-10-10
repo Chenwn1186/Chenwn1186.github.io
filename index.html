@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>伟宁的工具箱</title>
+<meta name="description" content="自研工具集合：数据可视化、效率工具与各类小实验，全部纯前端、零依赖、即开即用。">
+<meta name="theme-color" content="#FBFBF9">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232F5FD0'/><circle cx='16' cy='16' r='8.5' fill='none' stroke='white' stroke-width='2'/><circle cx='16' cy='16' r='3.4' fill='none' stroke='white' stroke-width='2'/></svg>">
+<script>
+  // 在样式表加载前就定好主题，避免深色用户看到一瞬间的白屏
+  (function () {
+    try {
+      var s = localStorage.getItem('theme');
+      var dark = s ? s === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+      if (dark) document.documentElement.classList.add('dark');
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

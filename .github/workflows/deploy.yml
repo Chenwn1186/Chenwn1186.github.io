@@ -1,0 +1,61 @@
+# 把 dist/ 部署到 GitHub Pages
+#
+# 触发：推送到 main（或手动在 Actions 页面点 Run workflow）
+# 前置：仓库 Settings → Pages → Source 选「GitHub Actions」（只需设一次）
+#
+# 注意 base 路径：
+#   用户站（仓库名叫 <用户名>.github.io）→ 站点在域名根，base = "/"
+#   项目站（仓库名任意）              → 站点在 /<仓库名>/，base = "/<仓库名>/"
+# 下面的 VITE_BASE 会自动判断，两种仓库结构都不用手改代码。
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个部署；新的推送取消排队中的旧任务
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建（含数据清洗）
+        env:
+          VITE_BASE: ${{ github.event.repository.name == format('{0}.github.io', github.repository_owner) && '/' || format('/{0}/', github.event.repository.name) }}
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

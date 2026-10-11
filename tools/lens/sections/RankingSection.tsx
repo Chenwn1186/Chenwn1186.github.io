@@ -1,6 +1,6 @@
 import { useMemo, useState, type RefObject } from 'react';
 import { BARS, brandColor, brandLabel, fmt, hex2rgba, type Lens } from '../domain/lens';
-import { chartThemeFor, gridStyle, NO_GRID, pointerFromChart, type ChartSpec } from '@platform/chart/chart';
+import { anchorFromChart, chartThemeFor, gridStyle, NO_GRID, type ChartSpec } from '@platform/chart/chart';
 import { ChartBox } from '@platform/chart/ChartBox';
 import { ChartCard, SectionHead, Tabs } from '@platform/ui/ui';
 import type { TipHandle } from '../components/LensTip';
@@ -67,7 +67,7 @@ export function RankingSection({ rows, tipRef }: { rows: Lens[]; tipRef: RefObje
           if (!els.length) return tip.hide();
           const d = top[els[0].index];
           if (!d) return tip.hide();
-          const p = pointerFromChart(e, chart);
+          const p = anchorFromChart(e, els, chart);
           tip.show(p.x, p.y, d, `${metric.n} ${fmt(d[metric.k] as number)}`);
         },
       },
@@ -117,7 +117,7 @@ export function RankingSection({ rows, tipRef }: { rows: Lens[]; tipRef: RefObje
           if (!els.length) return tip.hide();
           const d = top[els[0].index];
           if (!d) return tip.hide();
-          const p = pointerFromChart(e, chart);
+          const p = anchorFromChart(e, els, chart);
           tip.show(p.x, p.y, d, `${metric.n} ${fmt(d[metric.k] as number)}`);
         },
       },

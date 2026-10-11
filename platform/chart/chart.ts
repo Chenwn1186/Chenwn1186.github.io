@@ -284,3 +284,35 @@ export function pointerFromChart(e: any, chart: any): { x: number; y: number } {
   if (r) return { x: r.left + (e?.x ?? 0), y: r.top + (e?.y ?? 0) };
   return { x: 0, y: 0 };
 }
+
+/**
+ * 悬停浮层的锚点：优先**命中数据元素的实际渲染位置**，而不是鼠标位置。
+ *
+ * 为什么不能只跟鼠标：散点图 pointHitRadius=12（放宽命中区），鼠标无需压住点——
+ * 最近点可能距鼠标 12px 之外，浮层若摆在鼠标处就会与目标点视觉分离，
+ * 用户看到的是「悬停在某个数据上，浮层却对着另一处」（位置判定错位的实际来源）。
+ *
+ * Chart.js 元素带 getProps(['x','y'], true)——返回**画布内**坐标（最终渲染位置），
+ * 加上 canvas 的 boundingRect 即得屏幕坐标；鼠标坐标只作元素不可用时的兜底。
+ */
+export function anchorFromChart(
+  e: any,
+  els: any[],
+  chart: any,
+): { x: number; y: number } {
+  // onHover 的 els[i] 形状是 { element, datasetIndex, index }——
+  // Chart.js Element 实例嵌在 .element 属性上（实测 hasGetProps=undefined 踩过）。
+  const el = els?.[0]?.element ?? els?.[0];
+  if (el && typeof el.getProps === 'function' && chart?.canvas) {
+    try {
+      const p = el.getProps(['x', 'y'], true);
+      if (p && isFinite(p.x) && isFinite(p.y)) {
+        const r = chart.canvas.getBoundingClientRect();
+        return { x: r.left + p.x, y: r.top + p.y };
+      }
+    } catch {
+      /* 元素尚未完成布局时可能抛错——落到鼠标坐标兜底 */
+    }
+  }
+  return pointerFromChart(e, chart);
+}

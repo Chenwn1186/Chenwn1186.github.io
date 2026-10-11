@@ -4,7 +4,7 @@ import {
   chartThemeFor,
   gridStyle,
   NO_GRID,
-  pointerFromChart,
+  anchorFromChart,
   type ChartSpec,
 } from '@platform/chart/chart';
 import { ChartBox } from '@platform/chart/ChartBox';
@@ -208,7 +208,7 @@ export function OverviewSection({ rows, tipRef }: { rows: Lens[]; tipRef: RefObj
             if (!els.length) return tip.hide();
             const d = refsByDs[els[0].datasetIndex]?.[els[0].index];
             if (!d) return tip.hide();
-            const p = pointerFromChart(e, chart);
+            const p = anchorFromChart(e, els, chart);
             tip.show(p.x, p.y, d);
           },
         };
@@ -314,7 +314,7 @@ export function OverviewSection({ rows, tipRef }: { rows: Lens[]; tipRef: RefObj
           const e0 = ent[els[0].index];
           const sample = best[els[0].index];
           if (!e0 || !sample) return tip.hide();
-          const p = pointerFromChart(e, chart);
+          const p = anchorFromChart(e, els, chart);
           tip.show(
             p.x,
             p.y,
@@ -380,7 +380,7 @@ export function OverviewSection({ rows, tipRef }: { rows: Lens[]; tipRef: RefObj
           const i = els[0].index;
           const d = rep[i];
           if (!d) return tip.hide();
-          const p = pointerFromChart(e, chart);
+          const p = anchorFromChart(e, els, chart);
           tip.show(p.x, p.y, d, `${labels[i]}mm 焦段 · 定焦 ${primes[i]} 支 / 变焦 ${zooms[i]} 支`);
         },
       },

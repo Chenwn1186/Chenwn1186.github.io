@@ -4,7 +4,7 @@ import {
   chartThemeFor,
   gridStyle,
   NO_GRID,
-  pointerFromChart,
+  anchorFromChart,
   type ChartSpec,
 } from '@platform/chart/chart';
 import { ChartBox } from '@platform/chart/ChartBox';
@@ -70,7 +70,7 @@ export function CompareSection({ selected, onRemove, tipRef }: Props) {
           const d = selected[els[0].datasetIndex];
           const m = METRICS[els[0].index];
           if (!d || !m) return tip.hide();
-          const p = pointerFromChart(e, chart);
+          const p = anchorFromChart(e, els, chart);
           tip.show(p.x, p.y, d, `${m.n} ${fmt(d[m.k])}`);
         },
       },
@@ -112,7 +112,7 @@ export function CompareSection({ selected, onRemove, tipRef }: Props) {
           const d = selected[els[0].datasetIndex];
           const m = METRICS[els[0].index];
           if (!d || !m) return tip.hide();
-          const p = pointerFromChart(e, chart);
+          const p = anchorFromChart(e, els, chart);
           tip.show(p.x, p.y, d, `${m.n} ${fmt(d[m.k])}`);
         },
       },
